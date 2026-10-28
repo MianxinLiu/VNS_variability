@@ -51,7 +51,7 @@ def main():
     for i,m in enumerate(('SE','DFA','MSE')):
         ax=fig.add_subplot(bg[0,i]);pair=base.paired_ladder(ax,metrics,m,'Spectral exponent' if m=='SE' else m,m)
         if m=='MSE':
-            mse_p=signed(pair.followup6w-pair.baseline)
+            mse_p=signed(pair.followup6w-pair.baseline, alternative='greater')
             ax.set_title(f'MSE\nmean Δ={(pair.followup6w-pair.baseline).mean():+.3f}\np={mse_p:.2g}')
             mse_ax=ax
         if i==0:base.label(ax,'B')
