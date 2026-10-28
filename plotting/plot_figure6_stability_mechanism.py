@@ -65,7 +65,7 @@ def changes_panel(subspec, data, fig):
     specs = [
         ("tonic_network_input", "Tonic network input (nA)", COLORS["input"]),
         ("mean_D_I", r"Motor $D_I$ ($s^{-1}$)", COLORS["slope"]),
-        ("inhibitory_loop_restoring", r"E–I–E gain ($s^{-1}$)", COLORS["loop"]),
+        ("inhibitory_loop_restoring", r"E–I–E feedback ($s^{-1}$)", COLORS["loop"]),
         ("motor_stability", r"Motor stability ($s^{-1}$)", COLORS["stability"]),
     ]
     rows = []
@@ -104,9 +104,9 @@ def correlations_panel(subspec, data, fig):
         ("tonic_network_input", "mean_D_I", "Δ tonic network input",
          r"Δ motor $D_I$", COLORS["input"]),
         ("mean_D_I", "inhibitory_loop_restoring", r"Δ motor $D_I$",
-         "Δ E–I–E restoring gain", COLORS["slope"]),
+         "Δ E–I–E feedback", COLORS["slope"]),
         ("inhibitory_loop_restoring", "motor_stability",
-         "Δ E–I–E restoring gain", "Δ motor stability margin", COLORS["loop"]),
+         "Δ E–I–E feedback", "Δ motor stability margin", COLORS["loop"]),
     ]
     rows = []
     for i, (xkey, ykey, xlabel, ylabel, color) in enumerate(specs):
