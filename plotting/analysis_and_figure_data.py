@@ -13,11 +13,23 @@ DFA_FILENAME = os.environ.get('DFA_FILENAME', 'DFA.npy')
 OUTPUT_SUFFIX = os.environ.get('OUTPUT_SUFFIX', '')
 PAIRED_TEST = os.environ.get('PAIRED_TEST', 'ttest')
 COLORS = {'baseline': '#445B6E', 'post': '#D96545', 'green': '#2E8B73', 'gold': '#C4972F', 'gray': '#8A96A3', 'light': '#B9C2CC', 'dark': '#263244', 'grid': '#D8DEE6'}
-HEMI_PAIR_KEYS = ['contra', 'ipsi']
+HEMI_PAIR_KEYS = ['ipsi', 'contra']
 HEMI_PAIR_TITLES = ['ipsilesional', 'contralesional']
 LEFT_ELC = [48, 41, 23, 63, 58, 43, 75, 65, 78]
 RIGHT_ELC = [206, 205, 212, 184, 182, 193, 142, 163, 171]
 MIN_COMMON_ROI_CHANNELS = 6
+
+# Anatomical lesion hemisphere from manuscript Table 1, keyed by participant ID.
+# ipsi always means ipsilesional; contra always means contralesional.
+COHORT1_LESION_SIDE = {
+    1: 'R', 2: 'R', 3: 'R', 4: 'R', 5: 'L',
+    6: 'R', 7: 'R', 8: 'R', 9: 'L', 10: 'L',
+}
+COHORT2_LESION_SIDE = {
+    'sub01': 'L', 'sub02': 'L', 'sub03': 'R', 'sub04': 'L',
+    'sub05': 'R', 'sub06': 'R', 'sub07': 'L', 'sub08': 'L', 'sub09': 'R',
+}
+
 FMA_C1 = np.array([
     30, 38, 27, 27, 20, 23, 39, 41, 23, 24, 39, 43, 47, 50, 27, 30,
     21, 22,
@@ -86,7 +98,7 @@ def load_cohort1(feature, transform=True):
     """Load the anonymized baseline/post Cohort 2 feature arrays."""
     root = Path('data/cohort2')
     subjects = sorted([p for p in root.iterdir() if p.is_dir()])
-    side = np.array(['R', 'R', 'L', 'R', 'L', 'L', 'R', 'R', 'L'])
+    lesion_sides = [COHORT2_LESION_SIDE[subject.name] for subject in subjects]
     keep = np.ones(len(subjects), dtype=bool)
     keep[[6, 8]] = False
     all_ch = []
@@ -100,8 +112,8 @@ def load_cohort1(feature, transform=True):
     all_ch = np.stack(all_ch, axis=0)
     left = np.stack([common_roi_mean(arr, LEFT_ELC) for arr in all_ch])
     right = np.stack([common_roi_mean(arr, RIGHT_ELC) for arr in all_ch])
-    ipsi = np.stack([left[i] if s == 'L' else right[i] for i, s in enumerate(side)], axis=0)
-    contra = np.stack([left[i] if s == 'R' else right[i] for i, s in enumerate(side)], axis=0)
+    ipsi = np.stack([left[i] if s == 'L' else right[i] for i, s in enumerate(lesion_sides)], axis=0)
+    contra = np.stack([left[i] if s == 'R' else right[i] for i, s in enumerate(lesion_sides)], axis=0)
     bilateral = (ipsi + contra) / 2
     return {'label': label, 'subjects': [p.name for p in subjects], 'keep': keep, 'channels': all_ch, 'ipsi': ipsi, 'contra': contra, 'bilateral': bilateral}
 
@@ -110,7 +122,6 @@ def load_cohort2(feature, transform=True, filename_override=None):
     root = Path('data/cohort1')
     visit_counts = {10: 3, 1: 5, 2: 6, 3: 3, 4: 3, 5: 3, 6: 5, 7: 5, 8: 4, 9: 4}
     subjects = [root / f'sub{sid:02d}' for sid in visit_counts]
-    side_by_subject_id = {1: 'L', 2: 'L', 3: 'L', 4: 'L', 5: 'R', 6: 'L', 7: 'L', 8: 'L', 9: 'R', 10: 'R'}
     rows = []
     all_week_channels = []
     fma_i = 0
@@ -125,8 +136,8 @@ def load_cohort2(feature, transform=True, filename_override=None):
             label = feature
         left = common_roi_mean(arr, LEFT_ELC)
         right = common_roi_mean(arr, RIGHT_ELC)
-        ipsi = left if side_by_subject_id[sid] == 'L' else right
-        contra = left if side_by_subject_id[sid] == 'R' else right
+        ipsi = left if COHORT1_LESION_SIDE[sid] == 'L' else right
+        contra = left if COHORT1_LESION_SIDE[sid] == 'R' else right
         bilateral = (ipsi + contra) / 2
         for i, week in enumerate(weeks):
             rows.append({'sid': sid, 'week': int(round(float(week))), 'ipsi': float(ipsi[i]), 'contra': float(contra[i]), 'bilateral': float(bilateral[i]), 'fma': float(FMA_C2[fma_i])})
@@ -331,7 +342,7 @@ def behavior_association_rows(weeks=None, cohorts_override=None, hemis=None):
     model_rows = []
     fit_rows = []
     selected_weeks = None if weeks is None else set(weeks)
-    for hemi in ('contra', 'ipsi', 'bilateral') if hemis is None else hemis:
+    for hemi in ('ipsi', 'contra', 'bilateral') if hemis is None else hemis:
         records = []
         for feature, cohort in cohorts.items():
             for row in cohort['rows']:

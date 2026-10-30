@@ -18,9 +18,9 @@ from manuscript_style import polish, trajectory_space
 
 
 OUT = Path("figures")
-HEMIS = ("contra", "ipsi")
-NAMES = {"contra": "Ipsilesional", "ipsi": "Contralesional"}
-COLORS = {"contra": "#C65D3B", "ipsi": "#258873"}
+HEMIS = ("ipsi", "contra")
+NAMES = {"ipsi": "Ipsilesional", "contra": "Contralesional"}
+COLORS = {"ipsi": "#C65D3B", "contra": "#258873"}
 COMPOSITE = "z(SE) − z(DFA)"
 
 
@@ -231,8 +231,8 @@ def main():
                             hspace=.65, wspace=.48)
     top_pair = grid[0, :].subgridspec(1, 2, wspace=.20)
     ax_comp = fig.add_subplot(top_pair[0, 0])
-    comp_stats = source.cohort2_paired_week_stats(long["Composite"], "ipsi", [2, 4, 6], alt="less")
-    source.plot_cohort2_key_trajectory(ax_comp, long["Composite"], "ipsi", COMPOSITE,
+    comp_stats = source.cohort2_paired_week_stats(long["Composite"], "contra", [2, 4, 6], alt="less")
+    source.plot_cohort2_key_trajectory(ax_comp, long["Composite"], "contra", COMPOSITE,
                                        "Cohort 1 contralesional composite", stats=comp_stats,
                                        mean_max_week=6, show_sigstars=True,
                                        equally_spaced_weeks=True, mean_color="#258873")

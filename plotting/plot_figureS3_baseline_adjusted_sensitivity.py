@@ -20,8 +20,8 @@ from matplotlib.lines import Line2D
 OUT = Path("figures")
 REF = Path("data/baseline_zscore_reference.csv")
 METRICS = ("SE", "DFA", "MSE", "Composite")
-HEMIS = (("contra", "Ipsilesional", "#C65D3B"),
-         ("ipsi", "Contralesional", "#258873"))
+HEMIS = (("ipsi", "Ipsilesional", "#C65D3B"),
+         ("contra", "Contralesional", "#258873"))
 COHORT_COLORS = {"Cohort 1": "#4C78A8", "Cohort 2": "#D5822B"}
 
 
